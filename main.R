@@ -11,6 +11,9 @@ Budget_review <- read_csv("Budget_review_2021-2022_Infrastructure_Investment_Pro
 sum(is.na(Budget_review))
 # check type of data
 str(Budget_review)
+budBack <- Budget_review                   # Duplicate data frame
+# multiply all numeric columns by 1000
+Budget_review[,c(6:11)] <- Budget_review[,c(6:11)] * 1000
 data <- Budget_review                   # Duplicate data frame
 names(Budget_review)                    # Check column names
 
@@ -22,27 +25,30 @@ ptyp <- data$`Project Type`
 # USPersonalExpenditure <- data.frame("Categorie"=rownames(USPersonalExpenditure), USPersonalExpenditure)
 # USPersonalExpenditure
 # data <- USPersonalExpenditure[,c('Categorie', 'X1960')]
+# make plotply bar chart
+# total investment in project type
+plot_ly(data, x = ~ptyp, y = ~totalBudgetedFin, type = 'bar')
+plot_ly(data, labels = ~ptyp, values = ~totalBudgetedFin, type = 'pie')
 
+# investment in terms of expected outcomes
 fig <- plot_ly(data, labels = ~domPriority, values = ~totalBudgetedFin, type = 'pie')
-fig <- fig %>% layout(title = 'Government Priority by Total Budgeted Financing Till 2026',
+fig <- fig %>% layout(title = 'Expected Outcome by Total Budgeted Financing Till 2026',
                       xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
                       yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 
 # goals for their budget
 fig
-# make plotply bar chart
-plot_ly(data, x = ~ptyp, y = ~totalBudgetedFin, type = 'bar')
+plot_ly(data, x = ~domPriority, y = ~totalBudgetedFin, type = 'bar')
 
 
 # things they are working or will be working on
 classificationOfProjects <- plot_ly(data, x = ~pclas, y = ~domPriority, type = 'scatter', mode = 'markers')
-classificationOfProjects <- classificationOfProjects %>% layout(title = 'Fields of Expected outcomes',
+classificationOfProjects <- classificationOfProjects %>% layout(title = 'Current Status of Projects',
                                 xaxis = list(title = 'Project Classification'),
-                                yaxis = list(title = 'Wellbeing Domain/ Government Priority'))
+                                yaxis = list(title = 'Fields of Expected outcomes'))
 classificationOfProjects
 
 plot_ly(data, labels = ~pclas, values = ~totalBudgetedFin, type = 'pie')
-plot_ly(data, labels = ~ptyp, values = ~totalBudgetedFin, type = 'pie')
 # order data by total budgeted financing in descending order
 totalBudgetOrdered <- data[order(-data$`Total Budgeted Financing ($'000)`),]
 top10 <- head(totalBudgetOrdered,10)
@@ -82,13 +88,16 @@ budgetProgressPerType
 # remove rows from budgetProgressPerType that are not in classesWithMostTotalBudget$`Project Type`
 budgetProgressPerTypeTop5 <- budgetProgressPerType[(budgetProgressPerType$`Project Type` %in% classesWithMostTotalBudget$`Project Type`),]
 budgetProgressPerTypeTop5
+# multiply the numeric columns by 1000
+budgetProgressPerTypeTop5[,c(2:6)] <- budgetProgressPerTypeTop5[,c(2:6)] * 1000
 
 budgetProgressPerType %>%
   gather(key = "bud_year", value = "budget", -`Project Type`) %>%
   ggplot(aes(x = bud_year, y = budget, color = `Project Type`, group = `Project Type`)) +
   geom_line() +
   geom_point(size=2) +
-  labs(title = "Budget Progress per Type", x = "Project Type", y = "Budget ($'000)")
+  theme(text = element_text(size=15)) +
+  labs(title = "Budget Progress per Type", x = "Project Type", y = "Budget")
 
 # taking top 5 project types
 budgetProgressPerTypeTop5 %>%
@@ -96,6 +105,7 @@ budgetProgressPerTypeTop5 %>%
   ggplot(aes(x = bud_year, y = budget, color = `Project Type`, group = `Project Type`)) +
   geom_line(size=2) +
   geom_point(size=3) +
+  theme(text = element_text(size=15)) +
   # geom_smooth(method = "lm", se = FALSE, size = .5) +
   labs(title = "Budget till 2026", x = "Project Type", y = "Budget ($'000)")
 
@@ -105,16 +115,18 @@ fig2
 budgetProgressPerType
 # plot budget progress per type
 budgetProgressPerType %>%
-  ggplot(aes(x = `Project Type`, y = `budget 2021-2022`)) +
+  ggplot(aes(x = `Project Type`, y = `budget 2021-2022`, color = `Project Type`, fill = `Project Type`)) +
+  theme(text = element_text(size=15)) +
   geom_bar(stat = "identity") +
   coord_flip() +
-  labs(title = "Budget Progress per Type", x = "Project Type", y = "Budget ($'000)")
+  labs(title = "Budget for 2021-2022", x = "Project Type", y = "Budget ($'000)")
 # plot budget progress per type
 budgetProgressPerType %>%
-  ggplot(aes(x = `Project Type`, y = `budget 2022-2023`)) +
+  ggplot(aes(x = `Project Type`, y = `budget 2022-2023`, color = `Project Type`, fill = `Project Type`)) +
+  theme(text = element_text(size=15)) +
   geom_bar(stat = "identity") +
   coord_flip() +
-  labs(title = "Budget Progress per Type", x = "Project Type", y = "Budget ($'000)")
+  labs(title = "Budget for 2022-2023", x = "Project Type", y = "Budget ($'000)")
 
 # make barchart of top 10 projects
 top10 %>%
